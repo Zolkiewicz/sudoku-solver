@@ -1,16 +1,14 @@
 import tkinter as tk 
-
-GRID_SIZE = 9
-CELL_SIZE = 50
-GRID_WIDTH = GRID_SIZE * CELL_SIZE
-GRID_HEIGHT = GRID_SIZE * CELL_SIZE
+import tkinter.messagebox
+import config
+import sudoku_c
 
 class SudokuGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Sudoku")
 
-        self.canvas = tk.Canvas(root, width = GRID_WIDTH, height = GRID_HEIGHT)
+        self.canvas = tk.Canvas(root, width = config.GRID_WIDTH, height = config.GRID_HEIGHT)
         self.canvas.pack()
 
         frame = tk.Frame(root)
@@ -22,8 +20,10 @@ class SudokuGUI:
         btn2.pack(side = "left")
         btn3 = tk.Button(frame, text = "Solve", command=self.solve_board)
         btn3.pack(side = "left")
+        btn4 = tk.Button(frame, text = "Clear", command=self.clear_board)
+        btn4.pack(side = "left")
 
-        self.board = [[0 for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
+        self.board = [[0 for _ in range(config.GRID_SIZE)] for _ in range(config.GRID_SIZE)]
 
         self.selected_row = None
         self.selected_col = None
@@ -36,33 +36,33 @@ class SudokuGUI:
     def draw_grid(self):
         self.canvas.delete("all")
 
-        for i in range(GRID_SIZE + 1):
+        for i in range(config.GRID_SIZE + 1):
             width = 3 if i % 3 == 0 else 1
-            pos = i * CELL_SIZE
+            pos = i * config.CELL_SIZE
 
-            self.canvas.create_line(pos, 0, pos, GRID_SIZE * CELL_SIZE, width = width)
-            self.canvas.create_line(0, pos, GRID_SIZE * CELL_SIZE, pos, width = width)
+            self.canvas.create_line(pos, 0, pos, config.GRID_SIZE * config.CELL_SIZE, width = width)
+            self.canvas.create_line(0, pos, config.GRID_SIZE * config.CELL_SIZE, pos, width = width)
         
-        for r in range(GRID_SIZE):
-                    for c in range(GRID_SIZE):
+        for r in range(config.GRID_SIZE):
+                    for c in range(config.GRID_SIZE):
                         num = self.board[r][c]
                         if num != 0:
-                            x = c * CELL_SIZE + CELL_SIZE // 2
-                            y = r * CELL_SIZE + CELL_SIZE // 2
+                            x = c * config.CELL_SIZE + config.CELL_SIZE // 2
+                            y = r * config.CELL_SIZE + config.CELL_SIZE // 2
                             self.canvas.create_text(x, y, text=str(num), font=("Arial", 15))
 
         if self.selected_row is not None:
-            x1 = self.selected_col * CELL_SIZE
-            y1 = self.selected_row * CELL_SIZE
-            x2 = x1 + CELL_SIZE
-            y2 = y1 + CELL_SIZE
+            x1 = self.selected_col * config.CELL_SIZE
+            y1 = self.selected_row * config.CELL_SIZE
+            x2 = x1 + config.CELL_SIZE
+            y2 = y1 + config.CELL_SIZE
             self.canvas.create_rectangle(x1, y1, x2, y2, outline="red", width = 3)
 
     def select_cell(self, event):
-        col = event.x // CELL_SIZE
-        row = event.y // CELL_SIZE
+        col = event.x // config.CELL_SIZE
+        row = event.y // config.CELL_SIZE
 
-        if row < GRID_SIZE and col < GRID_SIZE:
+        if row < config.GRID_SIZE and col < config.GRID_SIZE:
             self.selected_row = row
             self.selected_col = col
             self.draw_grid()
@@ -83,10 +83,24 @@ class SudokuGUI:
         print("Scan clicked")
 
     def check_board(self):
-        print("Check clicked")
-
+        if not sudoku_c.check(self.board):
+            tk.messagebox.showinfo(title=None, message='wrong')
+        else:
+            tk.messagebox.showinfo(title=None, message='fine')
+            
     def solve_board(self):
-        print("Solve clicked")
+        success, self.board = sudoku_c.solve(self.board)
+        if not success:
+            tk.messagebox.showinfo(title=None, message='wrong')
+        self.draw_grid()
+
+    def clear_board(self):
+        for r in range(config.GRID_SIZE):
+                    for c in range(config.GRID_SIZE):
+                        self.board[r][c] = 0
+        self.draw_grid()
+
+
 
 root = tk.Tk()
 app = SudokuGUI(root)
