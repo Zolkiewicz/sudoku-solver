@@ -1,7 +1,9 @@
 import tkinter as tk 
-import tkinter.messagebox
+from tkinter import messagebox
+from tkinter import filedialog
 import config
 import sudoku_c
+from OCR import read_sudoku
 
 class SudokuGUI:
     def __init__(self, root):
@@ -80,7 +82,15 @@ class SudokuGUI:
         self.draw_grid()
 
     def scan_board(self):
-        print("Scan clicked")
+        file_path = filedialog.askopenfilename(
+            title="Select Sudoku image",
+            filetypes=[("Image files", "*.png *.jpg ")]
+        )
+        if not file_path:
+            return
+
+        self.board = read_sudoku(file_path)
+        self.draw_grid()
 
     def check_board(self):
         if not sudoku_c.check(self.board):
@@ -99,7 +109,6 @@ class SudokuGUI:
                     for c in range(config.GRID_SIZE):
                         self.board[r][c] = 0
         self.draw_grid()
-
 
 
 root = tk.Tk()
