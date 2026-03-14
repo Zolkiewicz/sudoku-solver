@@ -28,20 +28,43 @@ def is_empty(cell):
 
     return white_pixels < total_pixels * 0.03
 
+def count_holes(cell):
+
+    contours, hierarchy = cv2.findContours(
+        cell,
+        cv2.RETR_TREE,
+        cv2.CHAIN_APPROX_SIMPLE
+    )
+
+    holes = 0
+
+    if hierarchy is not None:
+        for h in hierarchy[0]:
+            if h[3] != -1:
+                holes += 1
+
+    return holes
+
 def recognize_digit(cell):
     cell = clean_cell(cell)
 
     if is_empty(cell):
         return 0
 
-    cell = cv2.resize(cell, (64,64))
+    cell = cv2.resize(cell, (128,128))
 
     config = "--psm 10 -c tessedit_char_whitelist=123456789"
     text = pytesseract.image_to_string(cell, config=config)
     text = text.strip()
 
+    holes = count_holes(cell)
     if text.isdigit():
-        return int(text)
+        digit = int(text)
+        if digit == 3 and holes >= 2:
+            digit = 8
+        if digit == 8 and holes < 2:
+            digit = 3
+        return digit
 
     return 0
 

@@ -94,14 +94,14 @@ class SudokuGUI:
 
     def check_board(self):
         if not sudoku_c.check(self.board):
-            tk.messagebox.showinfo(title=None, message='wrong')
+            tk.messagebox.showinfo(title=None, message='incorrect')
         else:
-            tk.messagebox.showinfo(title=None, message='fine')
+            tk.messagebox.showinfo(title=None, message='correct')
             
     def solve_board(self):
         success, self.board = sudoku_c.solve(self.board)
         if not success:
-            tk.messagebox.showinfo(title=None, message='wrong')
+            tk.messagebox.showinfo(title=None, message='incorrect values')
         self.draw_grid()
 
     def clear_board(self):
